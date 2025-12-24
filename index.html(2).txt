@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>专业性欲健康评估测试</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        // Tailwind配置
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pink: {
+                            light: '#fef7fb',
+                            DEFAULT: '#f9c8dd',
+                            medium: '#f496b8',
+                            dark: '#e86a98',
+                            deep: '#d9487d'
+                        },
+                        purple: {
+                            light: '#f3e5f5',
+                            DEFAULT: '#ce93d8',
+                            dark: '#ab47bc'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .test-card {
+                @apply bg-white rounded-xl shadow-lg p-6 md:p-8 mb-6 transition-all duration-300 hover:shadow-xl;
+            }
+            .btn-primary {
+                @apply bg-pink-deep text-white py-3 px-6 rounded-lg font-medium hover:bg-pink-dark transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-medium focus:ring-opacity-50;
+            }
+            .option-btn {
+                @apply w-full text-left p-4 border border-pink rounded-lg mb-3 hover:bg-pink-light transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-pink-medium focus:ring-opacity-50;
+            }
+            .progress-bar {
+                @apply h-2 bg-pink-light rounded-full overflow-hidden;
+            }
+            .progress-fill {
+                @apply h-full bg-pink-deep transition-all duration-500;
+            }
+        }
+    </style>
+</head>
+<body class="bg-pink-light min-h-screen font-sans text-gray-800">
+    <!-- 头部 -->
+    <header class="bg-pink-deep text-white py-6 px-4 shadow-md">
+        <div class="container mx-auto max-w-4xl">
+            <h1 class="text-2xl md:text-3xl font-bold text-center">专业性欲健康评估测试</h1>
+            <p class="text-center mt-2 text-pink-light">科学评估 | 专业分析 | 隐私保护</p>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="container mx-auto max-w-4xl px-4 py-8">
+        <!-- 测试介绍 -->
+        <div id="intro-section" class="test-card">
+            <h2 class="text-xl md:text-2xl font-bold text-pink-deep mb-4">测试说明</h2>
+            <div class="space-y-4 text-gray-700">
+                <p>本测试基于国际公认的性欲评估量表（SIS）改编，包含15个维度的评估问题，旨在客观评估您的性欲水平及相关影响因素。</p>
+                <p class="font-medium">⚠️ 重要提示：</p>
+                <ul class="list-disc list-inside space-y-2 pl-4">
+                    <li>测试结果仅作参考，不构成医疗诊断依据</li>
+                    <li>请根据您近3个月的真实情况作答</li>
+                    <li>所有数据仅保存在您的本地浏览器中，我们不会收集</li>
+                    <li>如存在明显不适，建议咨询专业泌尿科/妇科医生</li>
+                </ul>
+            </div>
+            <button id="start-test" class="btn-primary w-full mt-6">开始测试</button>
+        </div>
+
+        <!-- 测试题目区 -->
+        <div id="test-section" class="hidden">
+            <!-- 进度条 -->
+            <div class="mb-6">
+                <div class="flex justify-between text-sm mb-1">
+                    <span>进度</span>
+                    <span id="progress-text">1/15</span>
+                </div>
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill" style="width: 6.67%"></div>
+                </div>
+            </div>
+
+            <!-- 题目卡片 -->
+            <div class="test-card">
+                <h3 id="question-title" class="text-lg font-semibold mb-6 text-gray-800">题目加载中...</h3>
+                <div id="options-container" class="space-y-2">
+                    <!-- 选项将动态生成 -->
+                </div>
+            </div>
+
+            <!-- 导航按钮 -->
+            <div class="flex justify-between mt-6">
+                <button id="prev-btn" class="btn-primary opacity-50 cursor-not-allowed" disabled>上一题</button>
+                <button id="next-btn" class="btn-primary">下一题</button>
+            </div>
+        </div>
+
+        <!-- 结果分析区 -->
+        <div id="result-section" class="hidden">
+            <div class="test-card">
+                <h2 class="text-xl md:text-2xl font-bold text-pink-deep mb-6">您的性欲健康评估结果</h2>
+                
+                <!-- 结果总览 -->
+                <div class="bg-pink-light rounded-lg p-6 mb-8">
+                    <h3 class="text-lg font-semibold mb-3">评估总得分：<span id="total-score" class="text-pink-deep text-xl">0</span> / 75</h3>
+                    <div id="result-overview" class="text-lg font-medium mb-4"></div>
+                    <div class="w-full bg-white rounded-full h-4 mb-2">
+                        <div id="result-bar" class="bg-pink-deep h-4 rounded-full"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-500">
+                        <span>偏低</span>
+                        <span>正常</span>
+                        <span>偏高</span>
+                    </div>
+                </div>
+
+                <!-- 详细分析 -->
+                <div id="detailed-analysis" class="space-y-6 mb-8">
+                    <!-- 详细分析内容将动态生成 -->
+                </div>
+
+                <!-- 专业术语解释 -->
+                <div class="mt-8">
+                    <h3 class="text-lg font-semibold mb-4 text-pink-deep">专业术语解释</h3>
+                    <div class="space-y-4 text-gray-700">
+                        <div class="border-b border-pink pb-3">
+                            <h4 class="font-medium text-pink-dark">性欲（Libido）</h4>
+                            <p class="text-sm mt-1">指个体对性活动的渴望程度，受生理、心理、社会、文化等多种因素影响，存在明显的个体差异和波动性。</p>
+                        </div>
+                        <div class="border-b border-pink pb-3">
+                            <h4 class="font-medium text-pink-dark">性欲减退（Hypoactive Sexual Desire Disorder, HSDD）</h4>
+                            <p class="text-sm mt-1">持续或反复地对性幻想和性活动的欲望降低或缺乏，导致明显的困扰或人际关系困难，需排除其他精神障碍或躯体疾病。</p>
+                        </div>
+                        <div class="border-b border-pink pb-3">
+                            <h4 class="font-medium text-pink-dark">性唤起障碍（Sexual Arousal Disorder）</h4>
+                            <p class="text-sm mt-1">个体在性刺激下难以达到或维持足够的性兴奋，男性表现为勃起困难，女性表现为阴道润滑不足，可单独或与性欲问题并存。</p>
+                        </div>
+                        <div class="border-b border-pink pb-3">
+                            <h4 class="font-medium text-pink-dark">性激素水平（Sex Hormone Levels）</h4>
+                            <p class="text-sm mt-1">主要包括睾酮、雌激素、孕激素等，睾酮是影响男女性欲的核心激素，水平异常会直接影响性欲强度。</p>
+                        </div>
+                        <div class="border-b border-pink pb-3">
+                            <h4 class="font-medium text-pink-dark">心理性性欲问题</h4>
+                            <p class="text-sm mt-1">由情绪、压力、焦虑、抑郁、人际关系冲突、性创伤等心理因素导致的性欲异常，占性欲问题的70%以上。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 建议 -->
+                <div class="mt-8 bg-purple-light rounded-lg p-6">
+                    <h3 class="text-lg font-semibold mb-3 text-purple-dark">专业建议</h3>
+                    <ul id="suggestions" class="list-disc list-inside space-y-2 text-gray-700">
+                        <!-- 建议将动态生成 -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 重新测试按钮 -->
+            <button id="restart-test" class="btn-primary w-full mt-6">重新测试</button>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-pink-deep text-white py-6 px-4 mt-12">
+        <div class="container mx-auto max-w-4xl text-center text-sm">
+            <p>© 2025 专业健康评估中心 | 本测试仅供科普参考，不替代专业医疗建议</p>
+            <p class="mt-2">隐私声明：所有测试数据仅存储在本地，不会上传至服务器</p>
+        </div>
+    </footer>
+
+    <script>
+        // 测试题目数据
+        const questions = [
+            {
+                id: 1,
+                text: "近3个月，您对性幻想或性活动的渴望频率如何？",
+                options: [
+                    { text: "几乎没有", score: 1 },
+                    { text: "偶尔（每月1-2次）", score: 2 },
+                    { text: "有时（每周1-2次）", score: 3 },
+                    { text: "经常（每周3-4次）", score: 4 },
+                    { text: "非常频繁（几乎每天）", score: 5 }
+                ]
+            },
+            {
+                id: 2,
+                text: "当您有性机会时，参与性活动的意愿程度如何？",
+                options: [
+                    { text: "完全不愿意", score: 1 },
+                    { text: "不太愿意", score: 2 },
+                    { text: "中立/无所谓", score: 3 },
+                    { text: "比较愿意", score: 4 },
+                    { text: "非常愿意", score: 5 }
+                ]
+            },
+            {
+                id: 3,
+                text: "您对性刺激（视觉、听觉、触觉等）的反应程度如何？",
+                options: [
+                    { text: "几乎无反应", score: 1 },
+                    { text: "轻微反应", score: 2 },
+                    { text: "中等反应", score: 3 },
+                    { text: "明显反应", score: 4 },
+                    { text: "强烈反应", score: 5 }
+                ]
+            },
+            {
+                id: 4,
+                text: "近3个月，您主动发起性活动的频率如何？",
+                options: [
+                    { text: "从未发起", score: 1 },
+                    { text: "极少发起", score: 2 },
+                    { text: "偶尔发起", score: 3 },
+                    { text: "经常发起", score: 4 },
+                    { text: "频繁发起", score: 5 }
+                ]
+            },
+            {
+                id: 5,
+                text: "您对自己当前的性欲水平满意吗？",
+                options: [
+                    { text: "非常不满意", score: 1 },
+                    { text: "不太满意", score: 2 },
+                    { text: "一般/无所谓", score: 3 },
+                    { text: "比较满意", score: 4 },
+                    { text: "非常满意", score: 5 }
+                ]
+            },
+            {
+                id: 6,
+                text: "压力/焦虑对您的性欲影响程度？",
+                options: [
+                    { text: "严重抑制", score: 1 },
+                    { text: "明显抑制", score: 2 },
+                    { text: "轻微影响", score: 3 },
+                    { text: "几乎无影响", score: 4 },
+                    { text: "无影响甚至增强", score: 5 }
+                ]
+            },
+            {
+                id: 7,
+                text: "您的睡眠质量对性欲的影响？",
+                options: [
+                    { text: "睡眠差严重降低性欲", score: 1 },
+                    { text: "睡眠差明显降低性欲", score: 2 },
+                    { text: "睡眠差轻微影响性欲", score: 3 },
+                    { text: "睡眠质量对性欲影响小", score: 4 },
+                    { text: "睡眠良好，对性欲无负面影响", score: 5 }
+                ]
+            },
+            {
+                id: 8,
+                text: "您的伴侣关系对性欲的影响？",
+                options: [
+                    { text: "关系差严重降低性欲", score: 1 },
+                    { text: "关系紧张明显降低性欲", score: 2 },
+                    { text: "关系一般，对性欲有轻微影响", score: 3 },
+                    { text: "关系良好，对性欲无负面影响", score: 4 },
+                    { text: "关系亲密，提升性欲", score: 5 }
+                ]
+            },
+            {
+                id: 9,
+                text: "您的身体健康状况对性欲的影响？",
+                options: [
+                    { text: "健康差严重降低性欲", score: 1 },
+                    { text: "健康状况一般，明显降低性欲", score: 2 },
+                    { text: "健康状况尚可，轻微影响性欲", score: 3 },
+                    { text: "健康良好，对性欲无负面影响", score: 4 },
+                    { text: "身体健康，提升性欲", score: 5 }
+                ]
+            },
+            {
+                id: 10,
+                text: "您服用的药物（如抗抑郁药、降压药等）对性欲的影响？",
+                options: [
+                    { text: "严重降低性欲", score: 1 },
+                    { text: "明显降低性欲", score: 2 },
+                    { text: "轻微影响性欲", score: 3 },
+                    { text: "几乎无影响", score: 4 },
+                    { text: "无影响", score: 5 }
+                ]
+            },
+            {
+                id: 11,
+                text: "您的情绪状态（抑郁/愉悦）对性欲的影响？",
+                options: [
+                    { text: "抑郁严重降低性欲", score: 1 },
+                    { text: "情绪低落明显降低性欲", score: 2 },
+                    { text: "情绪一般，轻微影响性欲", score: 3 },
+                    { text: "情绪稳定，对性欲无负面影响", score: 4 },
+                    { text: "情绪愉悦，提升性欲", score: 5 }
+                ]
+            },
+            {
+                id: 12,
+                text: "您对性体验的期待与实际感受的匹配度？",
+                options: [
+                    { text: "完全不匹配，感到失望", score: 1 },
+                    { text: "不太匹配，有些失望", score: 2 },
+                    { text: "基本匹配，无明显感受", score: 3 },
+                    { text: "比较匹配，感到满足", score: 4 },
+                    { text: "完全匹配，感到愉悦", score: 5 }
+                ]
+            },
+            {
+                id: 13,
+                text: "您的工作/生活压力对性欲的影响？",
+                options: [
+                    { text: "压力极大，完全无性欲", score: 1 },
+                    { text: "压力大，性欲明显降低", score: 2 },
+                    { text: "压力一般，性欲轻微降低", score: 3 },
+                    { text: "压力较小，对性欲影响不大", score: 4 },
+                    { text: "压力适中，对性欲无负面影响", score: 5 }
+                ]
+            },
+            {
+                id: 14,
+                text: "您对自身身体形象的满意度对性欲的影响？",
+                options: [
+                    { text: "非常不满意，严重降低性欲", score: 1 },
+                    { text: "不太满意，明显降低性欲", score: 2 },
+                    { text: "一般，轻微影响性欲", score: 3 },
+                    { text: "比较满意，对性欲无负面影响", score: 4 },
+                    { text: "非常满意，提升性欲", score: 5 }
+                ]
+            },
+            {
+                id: 15,
+                text: "总体而言，您认为自己的性欲水平与同龄人相比？",
+                options: [
+                    { text: "明显偏低", score: 1 },
+                    { text: "略低于平均", score: 2 },
+                    { text: "与平均水平相当", score: 3 },
+                    { text: "略高于平均", score: 4 },
+                    { text: "明显偏高", score: 5 }
+                ]
+            }
+        ];
+
+        // 全局变量
+        let currentQuestion = 0;
+        let userAnswers = Array(questions.length).fill(null);
+        let totalScore = 0;
+
+        // DOM元素
+        const introSection = document.getElementById('intro-section');
+        const testSection = document.getElementById('test-section');
+        const resultSection = document.getElementById('result-section');
+        const startTestBtn = document.getElementById('start-test');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartTestBtn = document.getElementById('restart-test');
+        const questionTitle = document.getElementById('question-title');
+        const optionsContainer = document.getElementById('options-container');
+        const progressText = document.getElementById('progress-text');
+        const progressFill = document.getElementById('progress-fill');
+        const totalScoreEl = document.getElementById('total-score');
+        const resultOverview = document.getElementById('result-overview');
+        const resultBar = document.getElementById('result-bar');
+        const detailedAnalysis = document.getElementById('detailed-analysis');
+        const suggestions = document.getElementById('suggestions');
+
+        // 初始化测试
+        function initTest() {
+            currentQuestion = 0;
+            userAnswers = Array(questions.length).fill(null);
+            totalScore = 0;
+            renderQuestion();
+            updateProgress();
+            updateNavButtons();
+        }
+
+        // 渲染当前题目
+        function renderQuestion() {
+            const question = questions[currentQuestion];
+            questionTitle.textContent = `${question.id}. ${question.text}`;
+            
+            // 清空选项容器
+            optionsContainer.innerHTML = '';
+            
+            // 生成选项按钮
+            question.options.forEach((option, index) => {
+                const optionBtn = document.createElement('button');
+                optionBtn.className = `option-btn ${userAnswers[currentQuestion] === index ? 'bg-pink-light border-pink-medium' : ''}`;
+                optionBtn.innerHTML = `<span class="mr-2">${String.fromCharCode(65 + index)}</span> ${option.text}`;
+                optionBtn.addEventListener('click', () => {
+                    // 记录答案
+                    userAnswers[currentQuestion] = index;
+                    // 更新选项样式
+                    document.querySelectorAll('.option-btn').forEach(btn => {
+                        btn.classList.remove('bg-pink-light', 'border-pink-medium');
+                    });
+                    optionBtn.classList.add('bg-pink-light', 'border-pink-medium');
+                });
+                optionsContainer.appendChild(optionBtn);
+            });
+        }
+
+        // 更新进度条
+        function updateProgress() {
+            const progressPercent = ((currentQuestion + 1) / questions.length) * 100;
+            progressFill.style.width = `${progressPercent}%`;
+            progressText.textContent = `${currentQuestion + 1}/${questions.length}`;
+        }
+
+        // 更新导航按钮状态
+        function updateNavButtons() {
+            // 上一题按钮
+            if (currentQuestion === 0) {
+                prevBtn.disabled = true;
+                prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                prevBtn.disabled = false;
+                prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+
+            // 下一题按钮文本
+            if (currentQuestion === questions.length - 1) {
+                nextBtn.textContent = '查看结果';
+            } else {
+                nextBtn.textContent = '下一题';
+            }
+        }
+
+        // 计算总分
+        function calculateScore() {
+            totalScore = 0;
+            userAnswers.forEach((answerIndex, qIndex) => {
+                if (answerIndex !== null) {
+                    totalScore += questions[qIndex].options[answerIndex].score;
+                }
+            });
+            return totalScore;
+        }
+
+        // 生成结果分析
+        function generateResult() {
+            calculateScore();
+            totalScoreEl.textContent = totalScore;
+            
+            // 结果分类
+            let resultType = '';
+            let resultDesc = '';
+            let analysis = '';
+            let suggestionList = [];
+            
+            // 计算结果百分比
+            const scorePercent = (totalScore / 75) * 100;
+            resultBar.style.width = `${scorePercent}%`;
+
+            // 结果判断
+            if (totalScore <= 25) {
+                // 性欲偏低
+                resultType = '性欲水平偏低';
+                resultDesc = '您的性欲水平明显低于平均水平，可能存在性欲减退的情况。';
+                analysis = `
+                    <div>
+                        <h4 class="font-medium text-pink-dark mb-2">1. 评估解读</h4>
+                        <p>您的总得分处于偏低区间（≤25分），提示存在明显的性欲减退倾向。性欲减退（HSDD）是最常见的性功能障碍之一，可能由多种因素共同作用导致：</p>
+                        <ul class="list-disc list-inside pl-4 mt-2 space-y-1">
+                            <li>心理因素：压力、焦虑、抑郁、情绪低落是主要诱因</li>
+                            <li>生理因素：激素水平异常（如睾酮偏低）、慢性疾病、药物影响</li>
+                            <li>关系因素：伴侣关系紧张、沟通不畅、性体验不佳</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-pink-dark mb-2 mt-4">2. 关键影响因素分析</h4>
+                        <p>根据您的答题情况，以下因素可能是主要影响：</p>
+                        <ul class="list-disc list-inside pl-4 mt-2 space-y-1">
+                            <li>压力/焦虑影响：${getFactorAnalysis(5)}</li>
+                            <li>情绪状态影响：${getFactorAnalysis(10)}</li>
+                            <li>伴侣关系影响：${getFactorAnalysis(7)}</li>
+                            <li>身体健康影响：${getFactorAnalysis(8)}</li>
+                        </ul>
+                    </div>
+                `;
+                suggestionList = [
+                    "建议先排查可逆性因素：调整作息、减轻压力、改善睡眠质量",
+                    "加强与伴侣的沟通，共同面对问题，避免指责和压力",
+                    "如持续超过6个月，建议就医检查激素水平（睾酮、甲状腺功能等）",
+                    "评估正在服用的药物是否有影响性欲的副作用，咨询医生是否可调整",
+                    "考虑心理咨询，处理可能存在的情绪问题或心理创伤",
+                    "避免过度关注性欲问题本身，减少自我压力，顺其自然"
+                ];
+            } else if (totalScore <= 50) {
+                // 性欲正常
+                resultType = '性欲水平正常';
+                resultDesc = '您的性欲水平处于健康的平均范围，符合大多数人的正常状态。';
+                analysis = `
+                    <div>
+                        <h4 class="font-medium text-pink-dark mb-2">1. 评估解读</h4>
+                        <p>您的总得分处于正常区间（26-50分），表明您的性欲水平符合健康成年人的平均水平。正常的性欲水平具有以下特征：</p>
+                        <ul class="list-disc list-inside pl-4 mt-2 space-y-1">
+                            <li>性欲强度适中，既不过低也不过高，符合个人生活状态</li>
+                            <li>对性刺激有正常反应，性唤起过程基本顺畅</li>
+                            <li>性欲波动在正常范围内，受情绪、压力等因素影响但可恢复</li>
+                            <li>性需求与伴侣需求基本匹配，无明显的性需求冲突</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-pink-dark mb-2 mt-4">2. 优势与改进点</h4>
+                        <p><strong>优势：</strong>您的情绪状态、伴侣关系和身体健康对性欲的影响总体积极。</p>
+                        <p><strong>可改进：</strong>${getImprovementAnalysis()}</p>
+                    </div>
+                `;
+                suggestionList = [
+                    "保持健康的生活方式：规律运动、均衡饮食、充足睡眠",
+                    "维持良好的伴侣沟通，定期交流彼此的性需求和感受",
+                    "学会管理压力，避免长期高压状态影响性欲稳定性",
+                    "保持适度的性活动频率，有助于维持正常的性欲水平",
+                    "关注身体变化，如出现持续性欲波动及时排查原因",
+                    "避免过度饮酒、吸烟等可能影响性功能的行为"
+                ];
+            } else {
+                // 性欲偏高
+                resultType = '性欲水平偏高';
+                resultDesc = '您的性欲水平高于平均水平，属于性欲旺盛的类型。';
+                analysis = `
+                    <div>
+                        <h4 class="font-medium text-pink-dark mb-2">1. 评估解读</h4>
+                        <p>您的总得分处于偏高区间（>50分），表明您的性欲水平明显高于普通人群。性欲旺盛本身并非异常，但需关注以下方面：</p>
+                        <ul class="list-disc list-inside pl-4 mt-2 space-y-1">
+                            <li>性欲强度较高，性需求频繁，可能与激素水平、性格特质相关</li>
+                            <li>需注意性欲需求与伴侣需求的匹配度，避免关系冲突</li>
+                            <li>高性欲如导致明显困扰或影响正常生活，需评估是否存在病理性因素</li>
+                            <li>需区分生理性高性欲与强迫性性行为的差异</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-pink-dark mb-2 mt-4">2. 关键特征分析</h4>
+                        <p>根据您的答题情况，您的高性欲特征主要表现为：</p>
+                        <ul class="list-disc list-inside pl-4 mt-2 space-y-1">
+                            <li>性幻想和性渴望频率显著高于平均水平</li>
+                            <li>对性刺激的反应强烈，性唤起迅速</li>
+                            <li>压力/情绪对性欲的抑制作用较小</li>
+                            <li>主动发起性活动的意愿强烈</li>
+                        </ul>
+                    </div>
+                `;
+                suggestionList = [
+                    "确保高性欲未对日常生活、工作或人际关系造成负面影响",
+                    "与伴侣坦诚沟通性需求，寻求双方都满意的解决方案",
+                    "将部分性精力转化为其他健康的生活兴趣，保持生活平衡",
+                    "注意性健康，避免因频繁性活动导致身体疲劳或健康风险",
+                    "如出现无法控制的性冲动，建议咨询专业医生评估是否存在激素异常",
+                    "保持健康的性观念，区分正常高性欲与性成瘾的边界"
+                ];
+            }
+
+            // 更新DOM
+            resultOverview.textContent = resultDesc;
+            
+            // 详细分析
+            detailedAnalysis.innerHTML = `
+                <div class="mb-6">
+                    <h4 class="font-medium text-pink-dark mb-2">总体评估</h4>
+                    <p>您的性欲水平被评估为：<strong class="text-pink-deep">${resultType}</strong>。这意味着${resultDesc}</p>
+                </div>
+                ${analysis}
+                <div>
+                    <h4 class="font-medium text-pink-dark mb-2 mt-4">3. 性欲的正常波动说明</h4>
+                    <p>需要强调的是，性欲水平存在生理性波动是完全正常的：</p>
+                    <ul class="list-disc list-inside pl-4 mt-2 space-y-1">
+                        <li>短期波动：受月经周期（女性）、压力、疲劳、情绪等影响</li>
+                        <li>长期变化：随年龄增长，性欲水平会自然变化，这是正常生理过程</li>
+                        <li>个体差异：不同人之间的正常性欲水平差异可达10倍以上</li>
+                        <li>健康标准：只要性欲水平未造成明显困扰，且与个人生活状态匹配，即为健康</li>
+                    </ul>
+                </div>
+            `;
+
+            // 建议
+            suggestions.innerHTML = '';
+            suggestionList.forEach(suggestion => {
+                const li = document.createElement('li');
+                li.textContent = suggestion;
+                suggestions.appendChild(li);
+            });
+        }
+
+        // 获取因素分析
+        function getFactorAnalysis(factorIndex) {
+            const score = userAnswers[factorIndex] !== null ? questions[factorIndex].options[userAnswers[factorIndex]].score : 3;
+            if (score <= 2) return '影响显著，是主要抑制因素';
+            if (score === 3) return '有一定影响，但不显著';
+            return '影响较小，基本无负面影响';
+        }
+
+        // 获取改进点分析
+        function getImprovementAnalysis() {
+            const factorIndices = [5, 10, 7, 8]; // 压力、情绪、伴侣、健康
+            const lowScores = [];
+            
+            factorIndices.forEach(index => {
+                const score = userAnswers[index] !== null ? questions[index].options[userAnswers[index]].score : 3;
+                if (score <= 2) {
+                    if (index === 5) lowScores.push('压力管理');
+                    if (index === 10) lowScores.push('情绪调节');
+                    if (index === 7) lowScores.push('伴侣沟通');
+                    if (index === 8) lowScores.push('身体健康');
+                }
+            });
+            
+            if (lowScores.length > 0) {
+                return `您在${lowScores.join('、')}方面还有提升空间，这些因素可能导致性欲偶尔波动。`;
+            } else {
+                return '您的各项影响因素均处于良好状态，只需维持现有生活方式即可。';
+            }
+        }
+
+        // 事件监听
+        startTestBtn.addEventListener('click', () => {
+            introSection.classList.add('hidden');
+            testSection.classList.remove('hidden');
+            initTest();
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+                updateProgress();
+                updateNavButtons();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            // 检查是否已答题
+            if (userAnswers[currentQuestion] === null) {
+                alert('请选择一个选项后继续');
+                return;
+            }
+
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+                updateProgress();
+                updateNavButtons();
+            } else {
+                // 完成测试，显示结果
+                testSection.classList.add('hidden');
+                resultSection.classList.remove('hidden');
+                generateResult();
+            }
+        });
+
+        restartTestBtn.addEventListener('click', () => {
+            resultSection.classList.add('hidden');
+            introSection.classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
